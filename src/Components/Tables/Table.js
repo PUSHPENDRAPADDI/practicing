@@ -567,9 +567,11 @@ const Table = () => {
     const [totalPage, setTotalPage] = useState(0)
     const [start, setStart] = useState(0)
     const [end, setEnd] = useState(itemPerPage)
+    const [selectedMultiple, setSelectedMultiple] = useState([])
 
     const header =
         [
+            { title: "", sort: false },
             { title: 'Id', sort: false },
             { title: 'title', sort: true },
             { title: 'description', sort: true },
@@ -610,6 +612,22 @@ const Table = () => {
             return 0
         })
         setData(sortData)
+    }
+
+    const handleMultiSelect = (e, item) => {
+        if (e.target.checked === true) {
+            const temp = [...selectedMultiple, item]
+            setSelectedMultiple(temp)
+        } else {
+            setSelectedMultiple(
+                selectedMultiple.filter(obj => obj.id !== item.id)
+            )
+        }
+    }
+    const handleDeleteMultipleselect = () => {
+        setData(
+            data.filter(obj1 => !selectedMultiple.some(obj2 => obj1.id === obj2.id))
+        )
     }
     useEffect(() => {
         setData(originalData.slice(start, end))
@@ -652,6 +670,9 @@ const Table = () => {
                 ))}
             </select>
             <button onClick={() => [setData(originalData), setFilterBrand(''), setFilterTitle('')]} >Reset Filter</button>
+            {selectedMultiple.length > 0 &&
+                <button onClick={handleDeleteMultipleselect}>Delete Selected Item </button>
+            }
             <div>
                 <button disabled={currentPage === 1} onClick={() => handlePageChange(currentPage - 1)}>Prev</button>
                 <span>Page {currentPage} of {totalPage}</span>
@@ -670,6 +691,7 @@ const Table = () => {
                 <tbody>
                     {data.map(item => (
                         <tr key={item.id} >
+                            <td> <input type="checkbox" onChange={(e) => handleMultiSelect(e, item)} /> </td>
                             <td>{item.id}  </td>
                             <td>{item.title} </td>
                             <td>{item.description}</td>
