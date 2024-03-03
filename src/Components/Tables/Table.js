@@ -579,7 +579,9 @@ const Table = () => {
             { title: 'rating', sort: false },
             { title: 'brand', sort: true },
             { title: 'category', sort: true },
-            { title: 'thumbnail', sort: false }]
+            { title: 'thumbnail', sort: false },
+            { title: 'Action', sort: false },
+        ]
 
     const handlePageChange = (page) => {
         setCurrentPage(page)
@@ -614,11 +616,31 @@ const Table = () => {
         setData(sortData)
     }
 
+    const handleDelete = (id) => {
+        setData(data.filter(obj => obj.id !== id))
+    }
+
+    const handleEdit = (id) => {
+        console.log(data.filter(obj => obj.id === id));
+    }
+
     const handleMultiSelect = (e, item) => {
         if (e.target.checked === true) {
+            let temp1 = data
+            let swapedIndex = temp1.findIndex(obj => obj.id === item.id)
+            let [swapObject] = temp1.splice(swapedIndex, 1)
+            temp1.unshift(swapObject)
+            setData(temp1)
             const temp = [...selectedMultiple, item]
             setSelectedMultiple(temp)
         } else {
+            let temp2 = data
+            debugger
+            let swapIndex = temp2.findIndex(obj => obj.id === item.id)
+            let [swapObject] = temp2.splice(swapIndex, 1)
+            temp2.splice((swapObject.id) - 1, 0, swapObject)
+            setData(temp2)
+
             setSelectedMultiple(
                 selectedMultiple.filter(obj => obj.id !== item.id)
             )
@@ -669,7 +691,7 @@ const Table = () => {
                         <option key={index} value={item}>{item}</option>
                 ))}
             </select>
-            <button onClick={() => [setData(originalData), setFilterBrand(''), setFilterTitle('')]} >Reset Filter</button>
+            <button onClick={() => [setData(originalData.slice(start, end)), setFilterBrand(''), setFilterTitle('')]} >Reset Filter</button>
             {selectedMultiple.length > 0 &&
                 <button onClick={handleDeleteMultipleselect}>Delete Selected Item </button>
             }
@@ -689,9 +711,9 @@ const Table = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {data.map(item => (
+                    {data.map((item, index) => (
                         <tr key={item.id} >
-                            <td> <input type="checkbox" onChange={(e) => handleMultiSelect(e, item)} /> </td>
+                            <td> <input type="checkbox" onChange={(e) => handleMultiSelect(e, item, index)} /> </td>
                             <td>{item.id}  </td>
                             <td>{item.title} </td>
                             <td>{item.description}</td>
@@ -700,6 +722,10 @@ const Table = () => {
                             <td>{item.brand}</td>
                             <td>{item.category}</td>
                             <td> <img src={item.thumbnail} alt="logo" srcset="" style={{ width: '50px' }} />  </td>
+                            {selectedMultiple.length === 0 && (<td>
+                                <button onClick={() => handleDelete(item.id)} >Delete</button>
+                                <button onClick={() => handleEdit(item.id)} >Edit</button>
+                            </td>)}
                         </tr>
                     ))}
                 </tbody>
