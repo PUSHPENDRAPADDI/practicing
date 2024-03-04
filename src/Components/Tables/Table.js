@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import './Table.css'
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import './Table.css';
 
 const Table = () => {
     const [originalData, setOriginalData] = useState([
@@ -651,6 +653,21 @@ const Table = () => {
             data.filter(obj1 => !selectedMultiple.some(obj2 => obj1.id === obj2.id))
         )
     }
+
+    const handleExportCSV = () => {
+        let csvContent = originalData.map(row => Object.values(row).join(',')).join('\n')
+        const blob = new Blob([csvContent], { type: 'text/csv' })
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a')
+        a.href = url
+        a.download = 'Table_DAta.csv'
+        a.click()
+        window.URL.revokeObjectURL(url);
+    }
+
+    const handleAddNewRow = () => {
+        setData([data[0], ...data])
+    }
     useEffect(() => {
         setData(originalData.slice(start, end))
     }, [currentPage])
@@ -692,6 +709,8 @@ const Table = () => {
                 ))}
             </select>
             <button onClick={() => [setData(originalData.slice(start, end)), setFilterBrand(''), setFilterTitle('')]} >Reset Filter</button>
+            <button onClick={handleAddNewRow}>Add New Row</button>
+            <button onClick={handleExportCSV}>Export CSV file</button>
             {selectedMultiple.length > 0 &&
                 <button onClick={handleDeleteMultipleselect}>Delete Selected Item </button>
             }
@@ -721,7 +740,7 @@ const Table = () => {
                             <td>{item.rating}</td>
                             <td>{item.brand}</td>
                             <td>{item.category}</td>
-                            <td> <img src={item.thumbnail} alt="logo" srcset="" style={{ width: '50px' }} />  </td>
+                            <td> <img src={item.thumbnail} alt="logo" srcSet="" style={{ width: '50px' }} />  </td>
                             {selectedMultiple.length === 0 && (<td>
                                 <button onClick={() => handleDelete(item.id)} >Delete</button>
                                 <button onClick={() => handleEdit(item.id)} >Edit</button>
